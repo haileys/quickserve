@@ -1,5 +1,6 @@
-# directory listing http server
-# one liner ;)
+#!/bin/bash
+
+# quickserve - easy and convenient HTTP server that serves directory listings and files.
 
 port=8080
 
