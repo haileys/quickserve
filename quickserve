@@ -23,7 +23,7 @@ while true; do
             if [ -d "$uri" ]; then
                 echo "<h2>Directory listing for $uri</h2>" > $tmp
                 echo "<ul>" >> $tmp
-                ls "$uri" | sed -e "s!\(.*\)!<li><a href='$uri\1'>\1</a></li>!" >> $tmp
+                ls "$uri" | sed -e "s!\(.*\)!<li><a href='$uri/\1'>\1</a></li>!" >> $tmp
                 echo "</ul>" >> $tmp
                 echo "HTTP/1.1 200 OK"
                 echo "Connection: close"
