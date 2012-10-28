@@ -21,9 +21,14 @@ while true; do
             read uri
             echo "[$(date)] $uri" >&2
             if [ -d "$uri" ]; then
-                echo "<h2>Directory listing for $uri</h2>" > $tmp
+                escuri="$(echo "$uri" | sed -e "s/'/\&#039;/" | sed -e 's/>/\&gt;/' | sed -e 's/</\&lt;/')"
+                echo "<h2>Directory listing for $escuri</h2>" > $tmp
                 echo "<ul>" >> $tmp
-                ls "$uri" | sed -e "s!\(.*\)!<li><a href='$uri/\1'>\1</a></li>!" >> $tmp
+                ls "$uri" |
+                    sed -e "s/'/\&#039;/" |
+                    sed -e 's/>/\&gt;/' |
+                    sed -e 's/</\&lt;/' |
+                    sed -e "s!\(.*\)!<li><a href='$escuri/\1'>\1</a></li>!" >> $tmp
                 echo "</ul>" >> $tmp
                 echo "HTTP/1.1 200 OK"
                 echo "Connection: close"
