@@ -27,7 +27,7 @@ while true; do
                 if [[ "$escuri" != */ ]]; then
                     escuri="$escuri/"
                 fi
-                ls "$uri" |
+                ls -a "$uri" |
                     tail -n +2 |
                     sed -e "s/'/\&#039;/" |
                     sed -e 's/>/\&gt;/' |
