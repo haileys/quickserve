@@ -5,14 +5,14 @@
 port=8080
 
 fifo=`mktemp /tmp/XXXXXX`
-tmp=`mktemp /tmp/XXXXXX`
+output_buffer=`mktemp /tmp/XXXXXX`
 
 rm -f "$fifo"
 mkfifo "$fifo"
 
 echo "Listening on $port" >&2
 
-trap 'echo -e "\rGoodbye."; rm -f "$fifo"; rm -f "$tmp"; exit' 2
+trap 'echo -e "\rGoodbye."; rm -f "$fifo"; rm -f "$output_buffer"; exit' 2
 
 while true; do
     nc -l -p "$port" < "$fifo" |
@@ -22,20 +22,24 @@ while true; do
             echo "[$(date)] $uri" >&2
             if [ -d "$uri" ]; then
                 escuri="$(echo "$uri" | sed -e "s/'/\&#039;/" | sed -e 's/>/\&gt;/' | sed -e 's/</\&lt;/')"
-                echo "<h2>Directory listing for $escuri</h2>" > $tmp
-                echo "<ul>" >> $tmp
+                echo "<h2>Directory listing for $escuri</h2>" > $output_buffer
+                echo "<ul>" >> $output_buffer
+                if [[ "$escuri" != */ ]]; then
+                    escuri="$escuri/"
+                fi
                 ls "$uri" |
+                    tail -n +2 |
                     sed -e "s/'/\&#039;/" |
                     sed -e 's/>/\&gt;/' |
                     sed -e 's/</\&lt;/' |
-                    sed -e "s!\(.*\)!<li><a href='$escuri/\1'>\1</a></li>!" >> $tmp
-                echo "</ul>" >> $tmp
+                    sed -e "s!\(.*\)!<li><a href='$escuri\1'>\1</a></li>!" >> $output_buffer
+                echo "</ul>" >> $output_buffer
                 echo "HTTP/1.1 200 OK"
                 echo "Connection: close"
                 echo "Content-Type: text/html"
-                echo "Content-Length: $(stat $tmp | cut -d' ' -f8)"
+                echo "Content-Length: $(stat $output_buffer | cut -d' ' -f8)"
                 echo
-                cat $tmp
+                cat $output_buffer
             elif [ -f "$uri" ]; then
                 mime="$(file --mime-type "$uri" | sed -e 's/^.*: \(.*\)/\1/')"
                 echo "HTTP/1.1 200 OK"
