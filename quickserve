@@ -15,7 +15,11 @@ echo "Listening on $port" >&2
 trap 'echo -e "\rGoodbye."; rm -f "$fifo"; rm -f "$output_buffer"; exit' 2
 
 while true; do
-    nc -l -p "$port" < "$fifo" |
+  if [[ `uname` == 'Darwin' ]]; then
+     nc -l "localhost" "$port"
+  else
+     nc -l -p "$port"
+  fi < "$fifo" |
         head -n 1 |
         cut -d' ' -f2 | (
             read uri
