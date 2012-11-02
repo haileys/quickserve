@@ -14,8 +14,15 @@ echo "Listening on $port" >&2
 
 trap 'echo -e "\rGoodbye."; rm -f "$fifo"; rm -f "$output_buffer"; exit' 2
 
+
+netcat_help=$(nc -h 2>&1)
+
 while true; do
-    nc -l -p "$port" < "$fifo" |
+  if [[ "$netcat_help" =~ 'GNU' ]]; then
+    nc -l -p "$port"
+  else
+    nc -l "localhost" "$port"
+  fi < "$fifo" |
         head -n 1 |
         cut -d' ' -f2 | (
             read uri
