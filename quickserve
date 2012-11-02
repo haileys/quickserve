@@ -15,7 +15,7 @@ echo "Listening on $port" >&2
 trap 'echo -e "\rGoodbye."; rm -f "$fifo"; rm -f "$output_buffer"; exit' 2
 
 
-netcat_help=$(nc -h 2>&1 >/dev/null)
+netcat_help=$(nc -h 2>&1)
 
 while true; do
   if [[ "$netcat_help" =~ 'GNU' ]]; then
